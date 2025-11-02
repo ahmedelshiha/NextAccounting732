@@ -244,8 +244,9 @@
 - **Notes:** Added API tests for user-management settings endpoint (tests/admin-user-management-settings.api.test.ts). Added hook tests (tests/admin/settings-user-management.hook.test.tsx).
 
 #### Task 4.2: Performance Profiling
-- **Status:** ⏸️ PENDING
+- **Status:** ✅ COMPLETED
 - **Effort:** 3-5 hours
+- **Notes:** Added lightweight render profiling to EnterpriseUsersPage using performanceMetrics (tracks mount and tab/user-count re-renders).
 
 ---
 
