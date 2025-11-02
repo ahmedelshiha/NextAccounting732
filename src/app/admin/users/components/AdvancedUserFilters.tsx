@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -10,6 +10,13 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { ChevronDown, X } from 'lucide-react'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 
 export interface UserFilters {
   search: string
