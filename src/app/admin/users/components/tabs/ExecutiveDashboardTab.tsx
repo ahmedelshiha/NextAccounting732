@@ -367,13 +367,42 @@ export function ExecutiveDashboardTab({
               <div className="flex-1 overflow-auto">
                 <UsersTable
                   users={filteredUsers}
-                  isLoading={isLoading}
+                  isLoading={isLoading || filterLoading}
                   selectedUserIds={selectedUserIds}
                   onSelectUser={handleSelectUser}
                   onSelectAll={handleSelectAll}
                   onViewProfile={() => {}}
                 />
               </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-4 flex items-center justify-between border-t pt-4">
+                  <Button
+                    onClick={() => setPage(currentPage - 1)}
+                    disabled={!hasPreviousPage || filterLoading}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
+                  <div className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </div>
+                  <Button
+                    onClick={() => setPage(currentPage + 1)}
+                    disabled={!hasNextPage || filterLoading}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </section>
           </div>
         </TabsContent>
