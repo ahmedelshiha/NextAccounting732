@@ -97,11 +97,11 @@ model User {
   @@unique([tenantId, email])
   @@index([tenantId, role])
   @@index([tenantId, createdAt])
-  @@index([tenantId, status])
+  @@index([tenantId, availabilityStatus])
   @@index([tenantId, department])
   @@index([tenantId, tier])
   @@index([tenantId, experienceYears])
-  @@index([tenantId, status, createdAt])
+  @@index([tenantId, availabilityStatus, createdAt])
   @@index([tenantId, role, createdAt])
   @@map("users")
 }
