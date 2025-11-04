@@ -53,10 +53,23 @@ export function EnterpriseUsersPage() {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
       const tab = params.get('tab') as TabType | null
+      const isRetireEntitiesTabEnabled = isFeatureEnabled('retireEntitiesTab', false)
+
+      let tabToSet: TabType = 'dashboard'
       const validTabs: TabType[] = ['dashboard', 'entities', 'workflows', 'bulk-operations', 'audit', 'rbac', 'admin']
+
       if (tab && (validTabs as string[]).includes(tab)) {
-        setActiveTab(tab)
+        // If Entities tab is requested but feature flag is enabled, redirect to Dashboard
+        if (tab === 'entities' && isRetireEntitiesTabEnabled) {
+          tabToSet = 'dashboard'
+          // Track legacy redirect for telemetry
+          trackEvent('users.redirect_legacy', { from: 'entities', to: 'dashboard' })
+        } else {
+          tabToSet = tab
+        }
       }
+
+      setActiveTab(tabToSet)
     }
   }, [])
   const context = useUsersContext()
