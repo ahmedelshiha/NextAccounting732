@@ -139,7 +139,7 @@ export const WorkstationInsightsPanel = memo(function WorkstationInsightsPanel({
           ) : (
             <Suspense fallback={<ChartSkeleton />}>
               <AnalyticsCharts
-                userGrowthTrend={effectiveChartData.userGrowthTrend}
+                userGrowthTrend={normalizedUserGrowthTrend}
                 departmentDistribution={effectiveChartData.departmentDistribution}
                 roleDistribution={effectiveChartData.roleDistribution}
                 workflowEfficiency={effectiveChartData.workflowEfficiency}
