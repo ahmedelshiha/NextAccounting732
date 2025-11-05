@@ -115,9 +115,9 @@ export function WorkstationIntegrated({
 
   // Handle user selection for profile dialog
   const handleSelectUser = useCallback((user: UserItem) => {
-    setSelectedUser(user)
-    setIsUserDialogOpen(true)
-  }, [])
+    context.setSelectedUser(user)
+    context.setProfileOpen(true)
+  }, [context])
 
   // Handle bulk user selection
   const handleToggleUserSelection = useCallback((userId: string) => {
