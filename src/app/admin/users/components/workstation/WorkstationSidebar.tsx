@@ -16,11 +16,18 @@ export const WorkstationSidebar = memo(function WorkstationSidebar({
   onAddUser,
   onReset,
 }: WorkstationSidebarProps) {
-  // Helper to safely extract string filter values
+  /**
+   * Safely extracts string filter values, handling both string and undefined types
+   * @param value The filter value to extract
+   * @returns The string value or undefined
+   */
   const getFilterValue = (value: any): string | undefined => {
     return typeof value === 'string' ? value : undefined
   }
 
+  /**
+   * Handle saved view changes - clears other filters and applies selected role filter
+   */
   const handleViewChange = useCallback((viewName: string, roleFilter?: string) => {
     if (onFiltersChange) {
       onFiltersChange({
@@ -33,23 +40,38 @@ export const WorkstationSidebar = memo(function WorkstationSidebar({
     }
   }, [onFiltersChange])
 
+  /**
+   * Handle reset button click - clears all filters
+   */
   const handleResetClick = useCallback(() => {
     if (onFiltersChange) {
-      onFiltersChange({})
+      onFiltersChange({
+        search: '',
+        role: '',
+        status: '',
+        department: '',
+        dateRange: 'all',
+      })
     }
     if (onReset) {
       onReset()
     }
   }, [onFiltersChange, onReset])
 
-  // Map filters from WorkstationIntegrated format to AdvancedUserFilters format
-  const mappedFilters: AUserFilters = useMemo(() => ({
-    search: getFilterValue((filters as any)?.search) || '',
-    role: getFilterValue((filters as any)?.role),
-    status: getFilterValue((filters as any)?.status),
-    department: getFilterValue((filters as any)?.department),
-    dateRange: getFilterValue((filters as any)?.dateRange),
-  }), [filters])
+  /**
+   * Map filters from WorkstationIntegrated format to AdvancedUserFilters format
+   * Ensures safe extraction of all filter values with proper typing
+   */
+  const mappedFilters: AUserFilters = useMemo(() => {
+    const dateRangeStr = getFilterValue(filters?.dateRange)
+    return {
+      search: getFilterValue(filters?.search) || '',
+      role: getFilterValue(filters?.role),
+      status: getFilterValue(filters?.status),
+      department: getFilterValue(filters?.department),
+      dateRange: (dateRangeStr as 'all' | 'today' | 'week' | 'month' | undefined) || undefined,
+    }
+  }, [filters])
 
   return (
     <div className="workstation-sidebar-content" data-testid="workstation-sidebar">
@@ -75,7 +97,9 @@ export const WorkstationSidebar = memo(function WorkstationSidebar({
               </div>
               <div className="stat-item">
                 <span className="stat-label">Active</span>
-                <span className="stat-value">{((stats as any).clients || 0) + ((stats as any).staff || 0) + ((stats as any).admins || 0) || 0}</span>
+                {/* TODO: Phase 3 - Replace with dedicated stats.active property for better performance */}
+                {/* For now, calculate as sum of clients + staff + admins, but stats object should include a direct 'active' count */}
+                <span className="stat-value">{(stats as any).active !== undefined ? (stats as any).active : ((stats as any).clients || 0) + ((stats as any).staff || 0) + ((stats as any).admins || 0) || 0}</span>
               </div>
               <div className="stat-item">
                 <span className="stat-label">Pending</span>

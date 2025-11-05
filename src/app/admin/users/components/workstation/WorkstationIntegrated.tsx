@@ -62,13 +62,19 @@ export function WorkstationIntegrated({
       const params = new URLSearchParams(window.location.search)
       return {
         search: params.get('search') || '',
-        role: (params.get('role') as any) || undefined,
-        status: (params.get('status') as any) || undefined,
-        department: (params.get('department') as any) || undefined,
-        dateRange: (params.get('dateRange') as any) || 'all',
+        role: params.get('role') || '',
+        status: params.get('status') || '',
+        department: params.get('department') || '',
+        dateRange: (params.get('dateRange') as 'all' | 'today' | 'week' | 'month') || 'all',
       }
     }
-    return {}
+    return {
+      search: '',
+      role: '',
+      status: '',
+      department: '',
+      dateRange: 'all',
+    }
   })
 
   // Update workstation context filters when local filters change
@@ -86,10 +92,11 @@ export function WorkstationIntegrated({
       if (newFilters.role) params.set('role', newFilters.role)
       if (newFilters.status) params.set('status', newFilters.status)
       if (newFilters.department) params.set('department', newFilters.department)
-      if (newFilters.dateRange) params.set('dateRange', newFilters.dateRange)
+      if (newFilters.dateRange && newFilters.dateRange !== 'all') params.set('dateRange', newFilters.dateRange)
 
-      const newUrl = params.toString()
-        ? `${window.location.pathname}?${newUrl}`
+      const queryString = params.toString()
+      const newUrl = queryString
+        ? `${window.location.pathname}?${queryString}`
         : window.location.pathname
 
       window.history.replaceState({}, '', newUrl)

@@ -68,10 +68,24 @@ export function WorkstationProvider({ children }: WorkstationProviderProps) {
     }
   }, [])
 
+  /**
+   * Refresh quick stats from API (Deferred to Phase 2.8 or Phase 3)
+   * TODO: Implement API call to fetch:
+   *   - totalUsers: Total user count
+   *   - activeUsers: Currently active user count
+   *   - pendingApprovals: Users awaiting approval
+   *   - inProgressWorkflows: Active workflows
+   * Expected endpoint: GET /api/admin/dashboard/quick-stats
+   * Dependencies: Needs filter context to apply user filters (optional)
+   */
   const refreshQuickStats = useCallback(async () => {
     setQuickStatsRefreshing(true)
     try {
-      // TODO: Fetch quick stats from API
+      // TODO: Replace with actual API call to fetch quick stats
+      // const response = await fetch('/api/admin/dashboard/quick-stats')
+      // const data = await response.json()
+      // setQuickStats(data)
+
       setQuickStats({
         ...defaultQuickStats,
         refreshedAt: new Date(),
@@ -83,6 +97,17 @@ export function WorkstationProvider({ children }: WorkstationProviderProps) {
     }
   }, [])
 
+  /**
+   * Apply bulk action to selected users
+   * TODO: Implement API call to execute bulk operations (Deferred to Phase 3)
+   * Supported bulk actions:
+   *   - 'changeRole': Assign new role (value: roleId)
+   *   - 'changeStatus': Update user status (value: status)
+   *   - 'assignDepartment': Move to department (value: departmentId)
+   *   - 'removeUsers': Deactivate/remove users
+   *   - 'reassignTasks': Reassign user's tasks (value: newOwnerId)
+   * Expected endpoint: POST /api/admin/users/bulk-actions
+   */
   const applyBulkAction = useCallback(async () => {
     if (!bulkActionType || selectedUserIds.size === 0) {
       console.warn('Bulk action requires action type and selected users')
@@ -91,7 +116,18 @@ export function WorkstationProvider({ children }: WorkstationProviderProps) {
 
     setIsApplyingBulkAction(true)
     try {
-      // TODO: Call API to apply bulk action
+      // TODO: Replace with actual API call
+      // const response = await fetch('/api/admin/users/bulk-actions', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({
+      //     action: bulkActionType,
+      //     value: bulkActionValue,
+      //     userIds: Array.from(selectedUserIds),
+      //   }),
+      // })
+      // const result = await response.json()
+
       console.log('Applying bulk action:', {
         action: bulkActionType,
         value: bulkActionValue,

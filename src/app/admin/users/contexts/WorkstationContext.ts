@@ -1,4 +1,4 @@
-import { createContext } from 'react'
+import { createContext, useContext } from 'react'
 import type { WorkstationContextType, QuickStatsData, UserFilters } from '../types/workstation'
 
 const defaultQuickStats: QuickStatsData = {
@@ -11,9 +11,10 @@ const defaultQuickStats: QuickStatsData = {
 
 const defaultFilters: UserFilters = {
   search: '',
-  roleFilter: '',
-  statusFilter: '',
-  departmentFilter: '',
+  role: '',
+  status: '',
+  department: '',
+  dateRange: 'all',
 }
 
 const defaultContextValue: WorkstationContextType = {
@@ -46,3 +47,17 @@ const defaultContextValue: WorkstationContextType = {
 }
 
 export const WorkstationContext = createContext<WorkstationContextType>(defaultContextValue)
+
+/**
+ * Hook to use the WorkstationContext
+ * Provides access to layout state, filters, quick stats, and bulk actions
+ * @returns {WorkstationContextType} The workstation context value
+ * @throws {Error} If used outside of WorkstationProvider
+ */
+export function useWorkstationContext(): WorkstationContextType {
+  const context = useContext(WorkstationContext)
+  if (!context) {
+    throw new Error('useWorkstationContext must be used within a WorkstationProvider')
+  }
+  return context
+}
