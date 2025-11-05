@@ -321,7 +321,8 @@ describe('Phase 2: Workstation Integration Tests', () => {
       )
 
       // Sidebar should be visible
-      expect(screen.queryByText(/Filters|filters/i)).toBeInTheDocument()
+      expect(screen.queryByTestId('workstation-sidebar')).toBeInTheDocument()
+      expect(screen.queryByTestId('filters-section')).toBeInTheDocument()
     })
 
     it('should have reset and close buttons in sidebar', () => {
@@ -331,10 +332,10 @@ describe('Phase 2: Workstation Integration Tests', () => {
         </WorkstationTestWrapper>
       )
 
-      // Look for sidebar controls
-      const resetButton = screen.queryByRole('button', { name: /reset/i })
-      const closeButton = screen.queryByRole('button', { name: /close/i })
-      
+      // Look for sidebar controls using data-testid
+      const resetButton = screen.queryByTestId('reset-filters-btn')
+      const closeButton = screen.queryByTestId('sidebar-close-btn')
+
       expect(resetButton || closeButton).toBeTruthy()
     })
   })
