@@ -4,7 +4,7 @@ import React from 'react'
 import { useAdminWorkBenchFeature } from '@/hooks/useAdminWorkBenchFeature'
 import { ExecutiveDashboardTab } from './tabs/ExecutiveDashboardTab'
 import AdminWorkBench from './workbench/AdminWorkBench'
-import { useUsersContext } from './contexts/UsersContextProvider'
+import { useUsersContext } from '../contexts/UsersContextProvider'
 
 /**
  * Feature-flag wrapper for gradual dashboard replacement
