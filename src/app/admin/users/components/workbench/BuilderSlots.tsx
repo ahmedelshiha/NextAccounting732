@@ -81,25 +81,21 @@ export function BuilderMetricsSlot() {
   }
 
   if (isLoading) {
-    return <OverviewCards /> // Show default while loading
+    return <OverviewCards />
   }
 
   if (error) {
     console.warn(`Failed to load Builder.io metrics content: ${error}`)
-    return <OverviewCards /> // Fallback to default on error
+    return <OverviewCards />
   }
 
   if (!content) {
-    return <OverviewCards /> // No content available
+    return <OverviewCards />
   }
 
   return (
     <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_METRICS}>
-      {content.blocks ? (
-        <div>{/* Render builder blocks */}</div>
-      ) : (
-        <OverviewCards />
-      )}
+      {content.blocks ? renderBuilderBlocks(content.blocks) : <OverviewCards />}
     </div>
   )
 }
