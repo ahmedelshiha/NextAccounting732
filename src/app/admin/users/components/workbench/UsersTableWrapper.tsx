@@ -106,14 +106,8 @@ export default function UsersTableWrapper({
         onSelectAll={handleSelectAll}
       />
 
-      {/* User Profile Dialog */}
-      {selectedUser && (
-        <UserProfileDialog
-          user={selectedUser}
-          isOpen={!!selectedUser}
-          onClose={() => setSelectedUser(null)}
-        />
-      )}
+      {/* User Profile Dialog - gets state from context */}
+      <UserProfileDialog />
     </>
   )
 }
