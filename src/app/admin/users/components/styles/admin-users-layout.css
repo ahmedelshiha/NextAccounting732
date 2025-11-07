@@ -222,31 +222,10 @@
 }
 
 /* ============================================================================
-   DARK MODE SUPPORT
+   LIGHT THEME COLORS (Always use light theme)
    ============================================================================ */
 
-@media (prefers-color-scheme: dark) {
-  .admin-workbench-container {
-    background-color: var(--color-background-dark, #0f172a);
-  }
-
-  .admin-workbench-header {
-    background-color: var(--color-surface-dark, #1a202c);
-    border-bottom-color: var(--color-border-dark, #334155);
-  }
-
-  .admin-workbench-sidebar,
-  .admin-workbench-metrics,
-  .admin-workbench-directory {
-    background-color: var(--color-surface-dark, #1a202c);
-    border-color: var(--color-border-dark, #334155);
-  }
-
-  .admin-workbench-footer {
-    background-color: var(--color-surface-dark, #1a202c);
-    border-top-color: var(--color-border-dark, #334155);
-  }
-}
+/* All components use light theme colors - no dark mode support for now */
 
 /* ============================================================================
    ANIMATION & TRANSITIONS
