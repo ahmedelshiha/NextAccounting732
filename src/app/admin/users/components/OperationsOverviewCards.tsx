@@ -37,28 +37,27 @@ function MetricCard({
   isLoading
 }: MetricCardProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        <span className="text-2xl">{icon}</span>
+    <Card className="bg-white border-gray-200 border-1">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+        <span className="text-xl">{icon}</span>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="space-y-2">
-            <div className="h-8 bg-gray-200 rounded w-16 animate-pulse" />
-            <div className="h-4 bg-gray-200 rounded w-24 animate-pulse" />
+            <div className="h-8 bg-gray-100 rounded w-16 animate-pulse" />
+            <div className="h-4 bg-gray-100 rounded w-24 animate-pulse" />
           </div>
         ) : (
           <>
-            <div className="text-2xl font-bold">{value}</div>
-            <p className="text-xs text-gray-500 mt-1">{description}</p>
+            <div className="text-3xl font-bold text-gray-900">{value}</div>
             {trend !== undefined && (
               <div
-                className={`text-xs font-semibold mt-2 ${
+                className={`text-sm font-medium mt-2 ${
                   trend > 0 ? 'text-green-600' : trend < 0 ? 'text-red-600' : 'text-gray-600'
                 }`}
               >
-                {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend)}% from last week
+                {trend > 0 ? '↑' : trend < 0 ? '↓' : '→'} {Math.abs(trend)}%
               </div>
             )}
           </>
