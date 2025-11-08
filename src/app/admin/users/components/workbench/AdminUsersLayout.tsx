@@ -123,6 +123,7 @@ export default function AdminUsersLayout() {
   }
 
   const handleRefresh = async () => {
+    setIsRefreshing(true)
     const toastId = toast.loading('Refreshing data...')
     try {
       // Trigger data refresh through context
@@ -136,6 +137,8 @@ export default function AdminUsersLayout() {
       console.error('Refresh error:', error)
       toast.dismiss(toastId)
       toast.error('Failed to refresh data')
+    } finally {
+      setIsRefreshing(false)
     }
   }
 
