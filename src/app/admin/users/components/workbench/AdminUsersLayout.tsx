@@ -27,7 +27,7 @@ import '../styles/admin-users-layout.css'
  * │              │   ├──────────────────┤    │
  * │              │   │   DirectoryHead  │    │
  * │              │   ├──────────────────┤    │
- * ��              │   │  UsersTable      │    │
+ * │              │   │  UsersTable      │    │
  * │              │   │  (virtualized)   │    │
  * │              │   └──────────────────┘    │
  * ├──────────────┴──────────���─────────────────┤
@@ -50,6 +50,31 @@ export default function AdminUsersLayout() {
 
   const handleClearSelection = () => {
     setSelectedUserIds(new Set())
+  }
+
+  const handleAddUser = () => {
+    console.log('Add User clicked')
+    toast.info('Add User feature coming soon')
+  }
+
+  const handleImport = () => {
+    console.log('Import clicked')
+    setShowImportWizard(true)
+  }
+
+  const handleExport = async () => {
+    console.log('Export clicked')
+    try {
+      toast.success('Export feature coming soon')
+    } catch (error) {
+      toast.error('Failed to export users')
+      console.error('Export error:', error)
+    }
+  }
+
+  const handleRefresh = () => {
+    console.log('Refresh clicked')
+    window.location.reload()
   }
 
   const handleImportComplete = (results: any) => {
