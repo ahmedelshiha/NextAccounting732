@@ -40,10 +40,7 @@ export function QuickActionsBar({
 }: QuickActionsBarProps) {
   return (
     <div className="sticky top-0 z-40 bg-blue-500 text-white shadow-md">
-      <div className="flex items-center justify-between px-6 py-4">
-        {/* Left: Admin Title */}
-        <h1 className="text-xl font-semibold text-white">Admin</h1>
-
+      <div className="flex items-center justify-end px-6 py-4">
         {/* Right: Action Buttons */}
         <div className="flex items-center gap-2">
           <Button
