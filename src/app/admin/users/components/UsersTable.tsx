@@ -11,6 +11,9 @@ interface UsersTableProps {
   isLoading?: boolean
   onViewProfile: (user: UserItem) => void
   onRoleChange?: (userId: string, role: UserItem['role']) => Promise<void>
+  onEditInline?: (userId: string, field: string, value: any) => void
+  onDeleteUser?: (userId: string) => Promise<void>
+  onResetPassword?: (email: string) => Promise<void>
   isUpdating?: boolean
   selectedUserIds?: Set<string>
   onSelectUser?: (userId: string, selected: boolean) => void
