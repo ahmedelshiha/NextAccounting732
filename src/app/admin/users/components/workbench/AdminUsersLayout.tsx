@@ -23,7 +23,7 @@ import '../styles/admin-users-layout.css'
  * │        Sticky Header: QuickActionsBar        │
  * ├──────────────┬─────────────────��───────���──┤
  * │              │                            │
- * ��   Sidebar    │     Main Content Area      │
+ * │   Sidebar    │     Main Content Area      │
  * │  (Analytics  │   ┌──────────────────��    │
  * │  + Filters)  │   │   OverviewCards  │    │
  * │              │   ├──────────────────┤    │
@@ -34,7 +34,7 @@ import '../styles/admin-users-layout.css'
  * │              │   └──────────────────┘    │
  * ├──────────────┴──────────���─────────────────┤
  * │  Sticky Footer: BulkActionsPanel (if sel) │
- * └────────────────���────────────────────────────┘
+ * └────────────────������───────────────────────────┘
  * 
  * Responsive breakpoints:
  * - Desktop (≥1400px): Sidebar visible, 3-column layout
@@ -46,7 +46,9 @@ export default function AdminUsersLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [filters, setFilters] = useState<Record<string, any>>({})
   const [showImportWizard, setShowImportWizard] = useState(false)
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false)
   const isBuilderEnabled = useIsBuilderEnabled()
+  const context = useUsersContext()
 
   const selectedCount = useMemo(() => selectedUserIds.size, [selectedUserIds.size])
 
