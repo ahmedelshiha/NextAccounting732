@@ -138,13 +138,17 @@ export default function UsersTableWrapper({
           onSidebarToggle={() => console.log('Toggle sidebar')}
         />
 
-        <UserDirectoryFilterBar
+        <UserDirectoryFilterBarEnhanced
           filters={filterState}
           onFiltersChange={(newFilters) => {
             updateFilter('search', newFilters.search)
-            updateFilter('role', newFilters.role)
-            updateFilter('status', newFilters.status)
+            updateFilter('roles', newFilters.roles || [])
+            updateFilter('statuses', newFilters.statuses || [])
           }}
+          onToggleRole={toggleRole}
+          onToggleStatus={toggleStatus}
+          onClearRoles={clearRoles}
+          onClearStatuses={clearStatuses}
           selectedCount={selectedUserIds.size}
           totalCount={stats.totalCount}
           filteredCount={stats.filteredCount}
@@ -163,6 +167,7 @@ export default function UsersTableWrapper({
             { value: 'INACTIVE', label: 'Inactive' },
             { value: 'SUSPENDED', label: 'Suspended' }
           ]}
+          multiSelect={true}
         />
 
         <div className="flex-1 overflow-hidden min-h-0 w-full">
