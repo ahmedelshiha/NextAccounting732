@@ -300,12 +300,15 @@ export const POST = withTenantContext(async (request: NextRequest) => {
       return respond.conflict('User with this email already exists')
     }
 
+    // Hash password before storing in database
+    const hashedPassword = password ? await bcrypt.hash(password, 12) : undefined
+
     const newUser = await prisma.user.create({
       data: {
         name,
         email,
         role,
-        password,
+        password: hashedPassword,
         tenantId
       }
     })
