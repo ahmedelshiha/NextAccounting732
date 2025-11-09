@@ -77,11 +77,15 @@ export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps)
 
           <Button
             onClick={handleManagePermissions}
+            disabled={permissionsSaving}
             className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
           >
             <Shield className="h-4 w-4" />
-            Manage Permissions & Role
+            {permissionsSaving ? 'Updating Permissions...' : 'Manage Permissions & Role'}
           </Button>
+          <p className="text-xs text-slate-600 mt-3">
+            Click to open the permission management modal where you can assign roles and specific permissions to this user.
+          </p>
         </div>
       </section>
 
