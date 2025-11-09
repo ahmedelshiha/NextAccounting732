@@ -7,10 +7,9 @@ import { OverviewTab } from '../UserProfileDialog/OverviewTab'
 import { DetailsTab } from '../UserProfileDialog/DetailsTab'
 import { ActivityTab } from '../UserProfileDialog/ActivityTab'
 import { SettingsTab } from '../UserProfileDialog/SettingsTab'
+import { PermissionsTab } from '../UserProfileDialog/PermissionsTab'
 import { useUserActions } from '../../hooks/useUserActions'
 import { toast } from 'sonner'
-import UnifiedPermissionModal from '@/components/admin/permissions/UnifiedPermissionModal'
-import type { Permission } from '@/lib/permissions'
 
 export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
   const {
@@ -22,9 +21,7 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
     setSelectedUser,
     editForm,
     setUpdating,
-    updating,
-    permissionModalOpen,
-    setPermissionModalOpen
+    updating
   } = useUsersContext()
 
   const { updateUser } = useUserActions({
@@ -120,7 +117,7 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
 
         {/* Tabs (mobile secondary nav) */}
         <div className="sm:hidden border-t border-slate-200 flex overflow-x-auto">
-          {(['overview', 'details', 'activity', 'settings'] as const).map((id) => (
+          {(['overview', 'details', 'permissions', 'activity', 'settings'] as const).map((id) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
@@ -143,6 +140,7 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
               {([
                 { id: 'overview', label: 'Overview' },
                 { id: 'details', label: 'Details' },
+                { id: 'permissions', label: 'Permissions' },
                 { id: 'activity', label: 'Activity' },
                 { id: 'settings', label: 'Settings' },
               ] as const).map((item) => (
@@ -166,6 +164,7 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
             <div className="max-w-5xl mx-auto px-6 md:px-8 py-8">
               {activeTab === 'overview' && <OverviewTab user={selectedUser} />}
               {activeTab === 'details' && <DetailsTab user={selectedUser} isEditing={editMode} />}
+              {activeTab === 'permissions' && <PermissionsTab user={selectedUser} />}
               {activeTab === 'activity' && <ActivityTab userId={selectedUser.id} />}
               {activeTab === 'settings' && <SettingsTab user={selectedUser} />}
             </div>
@@ -173,33 +172,6 @@ export default function InlineUserProfile({ onBack }: { onBack: () => void }) {
         </div>
       </div>
 
-      {/* Permission Modal */}
-      {permissionModalOpen && selectedUser && (
-        <UnifiedPermissionModal
-          mode="user"
-          targetId={selectedUser.id}
-          targetName={selectedUser.name || 'User'}
-          targetEmail={selectedUser.email}
-          currentRole={selectedUser.role}
-          currentPermissions={(selectedUser.permissions || []) as Permission[]}
-          onClose={() => setPermissionModalOpen(false)}
-          onSave={async (changes) => {
-            try {
-              const res = await fetch(`/api/admin/users/${selectedUser.id}/permissions`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(changes)
-              })
-              if (!res.ok) throw new Error('Failed to update permissions')
-              setPermissionModalOpen(false)
-              toast.success('Permissions updated successfully')
-            } catch (error) {
-              toast.error(error instanceof Error ? error.message : 'Failed to update permissions')
-              throw error
-            }
-          }}
-        />
-      )}
     </div>
   )
 }
