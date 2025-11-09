@@ -33,37 +33,15 @@ export default function UsersTableWrapper({
 }: UsersTableWrapperProps) {
   const context = useUsersContext()
 
-  // Filter users based on provided filters
-  const filteredUsers = useMemo(() => {
-    let result = Array.isArray(context.users) ? [...context.users] : []
-
-    // Apply search filter
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase()
-      result = result.filter(
-        (u) =>
-          u.name?.toLowerCase().includes(searchLower) ||
-          u.email?.toLowerCase().includes(searchLower)
-      )
-    }
-
-    // Apply role filter
-    if (filters.role) {
-      result = result.filter((u) => u.role === filters.role)
-    }
-
-    // Apply status filter
-    if (filters.status) {
-      result = result.filter((u) => u.status === filters.status)
-    }
-
-    // Apply department filter if available
-    if (filters.department && 'department' in result[0]) {
-      result = result.filter((u) => (u as any).department === filters.department)
-    }
-
-    return result
-  }, [context.users, filters])
+  // Use filter state hook for centralized filter management
+  const {
+    filters: filterState,
+    updateFilter,
+    filteredUsers,
+    hasActiveFilters,
+    clearFilters,
+    stats
+  } = useFilterState(context.users)
 
   const handleSelectUser = useCallback(
     (userId: string, selected: boolean) => {
