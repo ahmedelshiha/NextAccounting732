@@ -32,15 +32,59 @@ export const SettingsTab = memo(function SettingsTab({ user }: SettingsTabProps)
     setPermissionModalOpen(true)
   }, [setPermissionModalOpen])
 
-  const handleDeactivate = useCallback(() => {
-    alert('User deactivation would be processed here')
-    setShowDeactivateDialog(false)
-  }, [])
+  const [isDeactivating, setIsDeactivating] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  const handleDelete = useCallback(() => {
-    alert('User deletion would be processed here')
-    setShowDeleteDialog(false)
-  }, [])
+  const handleDeactivate = useCallback(async () => {
+    setIsDeactivating(true)
+    const toastId = toast.loading('Deactivating user...')
+    try {
+      const res = await apiFetch(`/api/admin/users/${user.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'INACTIVE' })
+      })
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}))
+        throw new Error(error.message || 'Failed to deactivate user')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('User deactivated successfully')
+      setShowDeactivateDialog(false)
+    } catch (error) {
+      toast.dismiss(toastId)
+      const message = error instanceof Error ? error.message : 'Failed to deactivate user'
+      toast.error(message)
+    } finally {
+      setIsDeactivating(false)
+    }
+  }, [user.id])
+
+  const handleDelete = useCallback(async () => {
+    setIsDeleting(true)
+    const toastId = toast.loading('Deleting user...')
+    try {
+      const res = await apiFetch(`/api/admin/users/${user.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}))
+        throw new Error(error.message || 'Failed to delete user')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('User deleted successfully')
+      setShowDeleteDialog(false)
+    } catch (error) {
+      toast.dismiss(toastId)
+      const message = error instanceof Error ? error.message : 'Failed to delete user'
+      toast.error(message)
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [user.id])
 
   return (
     <div className="max-w-2xl space-y-8">
