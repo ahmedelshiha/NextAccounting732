@@ -133,6 +133,33 @@ export default function UsersTableWrapper({
           onSidebarToggle={() => console.log('Toggle sidebar')}
         />
 
+        <UserDirectoryFilterBar
+          filters={filterState}
+          onFiltersChange={(newFilters) => {
+            updateFilter('search', newFilters.search)
+            updateFilter('role', newFilters.role)
+            updateFilter('status', newFilters.status)
+          }}
+          selectedCount={selectedUserIds.size}
+          totalCount={stats.totalCount}
+          filteredCount={stats.filteredCount}
+          onSelectAll={handleSelectAll}
+          onClearFilters={clearFilters}
+          roleOptions={[
+            { value: 'ADMIN', label: 'Admin' },
+            { value: 'TEAM_LEAD', label: 'Team Lead' },
+            { value: 'TEAM_MEMBER', label: 'Team Member' },
+            { value: 'STAFF', label: 'Staff' },
+            { value: 'CLIENT', label: 'Client' },
+            { value: 'VIEWER', label: 'Viewer' }
+          ]}
+          statusOptions={[
+            { value: 'ACTIVE', label: 'Active' },
+            { value: 'INACTIVE', label: 'Inactive' },
+            { value: 'SUSPENDED', label: 'Suspended' }
+          ]}
+        />
+
         <div className="flex-1 overflow-hidden min-h-0 w-full">
           <UsersTable
             users={filteredUsers}
