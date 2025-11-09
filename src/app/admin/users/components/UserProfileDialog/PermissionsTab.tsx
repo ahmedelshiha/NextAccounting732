@@ -34,12 +34,14 @@ export const PermissionsTab = memo(function PermissionsTab({ user }: Permissions
   const [isSaving, setIsSaving] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [selectedRole, setSelectedRole] = useState<string>(user.role || 'CLIENT')
+  const [selectedRole, setSelectedRole] = useState<'ADMIN' | 'CLIENT' | 'TEAM_MEMBER' | 'TEAM_LEAD' | 'STAFF' | 'VIEWER'>(
+    (user.role as 'ADMIN' | 'CLIENT' | 'TEAM_MEMBER' | 'TEAM_LEAD' | 'STAFF' | 'VIEWER') || 'CLIENT'
+  )
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>(
     (user.permissions as Permission[]) || []
   )
   const [error, setError] = useState<string | null>(null)
-  const [changeHistory, setChangeHistory] = useState<Array<{ role: string; permissions: Permission[] }>>([])
+  const [changeHistory, setChangeHistory] = useState<Array<{ role: 'ADMIN' | 'CLIENT' | 'TEAM_MEMBER' | 'TEAM_LEAD' | 'STAFF' | 'VIEWER'; permissions: Permission[] }>>([])
 
   // Check if there are changes
   const changeCount = useMemo(() => {
