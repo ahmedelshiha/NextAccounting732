@@ -31,24 +31,16 @@ export function useFilterState(users: UserItem[]) {
     setFilters(prev => ({ ...prev, search: value }))
   }, [])
 
-  // Memoized filtered results using existing useFilterUsers hook
-  const filteredUsers = useMemo(() => {
-    let result = users
+  // Use advanced search to support operators (=, ^, $, @)
+  const { results: advancedSearchResults } = useAdvancedSearch(
+    users,
+    filters.search,
+    ['name', 'email', 'phone', 'company', 'department']
+  )
 
-    // Apply search filter using the existing hook for consistency
-    if (filters.search) {
-      const searchOptions = {
-        search: filters.search,
-        role: undefined,
-        status: undefined
-      }
-      result = useFilterUsers(result, searchOptions, {
-        searchFields: ['name', 'email', 'phone'],
-        caseInsensitive: true,
-        sortByDate: false,  // Don't sort yet, we'll sort at the end
-        serverSide: false
-      }) as UserItem[]
-    }
+  // Memoized filtered results
+  const filteredUsers = useMemo(() => {
+    let result = advancedSearchResults
 
     // Apply multi-select role filter (OR logic: match any selected role)
     if (filters.roles.length > 0) {
@@ -69,7 +61,7 @@ export function useFilterState(users: UserItem[]) {
     )
 
     return result
-  }, [users, filters])
+  }, [advancedSearchResults, filters.roles, filters.statuses])
 
   const hasActiveFilters = !!(
     filters.search ||
