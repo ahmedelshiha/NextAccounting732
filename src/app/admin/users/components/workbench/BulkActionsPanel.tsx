@@ -29,25 +29,50 @@ export default function BulkActionsPanel({
   const [actionType, setActionType] = useState('set-status')
   const [actionValue, setActionValue] = useState('INACTIVE')
   const [isApplying, setIsApplying] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
+
+  const handlePreview = () => {
+    setShowPreview(true)
+    console.log({
+      action: 'preview',
+      userIds: Array.from(selectedUserIds),
+      actionType,
+      actionValue
+    })
+  }
 
   const handleApply = async () => {
     setIsApplying(true)
     try {
-      // TODO: Implement bulk action API call
-      console.log({
-        userIds: Array.from(selectedUserIds),
-        action: actionType,
-        value: actionValue
+      // Bulk action API call
+      const response = await fetch('/api/admin/users/bulk-action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userIds: Array.from(selectedUserIds),
+          action: actionType,
+          value: actionValue
+        })
       })
+
+      if (!response.ok) {
+        throw new Error('Failed to apply bulk action')
+      }
+
+      console.log('Bulk action applied successfully')
       // After successful application, clear selection
       onClear()
+    } catch (error) {
+      console.error('Error applying bulk action:', error)
     } finally {
       setIsApplying(false)
     }
   }
 
   return (
-    <div className="admin-bulk-actions-panel">
+    <div className="admin-bulk-actions-panel" data-testid="bulk-actions-panel">
       <div className="admin-bulk-actions-content">
         {/* Left: Selected count and action selector */}
         <div className="admin-bulk-actions-left">
@@ -126,7 +151,9 @@ export default function BulkActionsPanel({
             variant="outline"
             size="sm"
             disabled={isApplying}
+            onClick={handlePreview}
             aria-label="Preview bulk action"
+            data-testid="preview-button"
           >
             Preview
           </Button>
@@ -136,6 +163,7 @@ export default function BulkActionsPanel({
             disabled={isApplying}
             size="sm"
             aria-label="Apply bulk action to selected users"
+            data-testid="apply-button"
           >
             {isApplying ? 'Applying...' : 'Apply Changes'}
           </Button>
@@ -145,6 +173,7 @@ export default function BulkActionsPanel({
             className="admin-bulk-actions-clear"
             aria-label="Clear selection"
             title="Clear selection"
+            data-testid="clear-button"
           >
             <X className="w-4 h-4" />
           </button>
@@ -153,11 +182,12 @@ export default function BulkActionsPanel({
 
       <style jsx>{`
         .admin-bulk-actions-panel {
-          padding: 0.75rem 1rem;
-          background-color: white;
-          border-top: 1px solid var(--color-border, #e2e8f0);
+          padding: 1rem 1.5rem;
+          background-color: #ffffff;
+          border-top: 1px solid #e5e7eb;
           display: flex;
           align-items: center;
+          box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .admin-bulk-actions-content {
@@ -179,30 +209,31 @@ export default function BulkActionsPanel({
         .admin-bulk-actions-count {
           font-size: 0.875rem;
           font-weight: 500;
-          color: var(--color-text, #1e293b);
+          color: #6b7280;
           white-space: nowrap;
         }
 
         .admin-bulk-actions-select {
           padding: 0.5rem 0.75rem;
           font-size: 0.875rem;
-          border: 1px solid var(--color-border, #e2e8f0);
+          border: 1px solid #d1d5db;
           border-radius: 0.375rem;
-          background-color: white;
-          color: var(--color-text, #1e293b);
+          background-color: #ffffff;
+          color: #111827;
           cursor: pointer;
           transition: border-color 0.2s, box-shadow 0.2s;
           flex-shrink: 0;
         }
 
         .admin-bulk-actions-select:hover {
-          border-color: var(--color-border-hover, #cbd5e1);
+          border-color: #9ca3af;
+          background-color: #f9fafb;
         }
 
         .admin-bulk-actions-select:focus {
           outline: none;
-          border-color: var(--color-focus, #3b82f6);
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          border-color: #1f55d4;
+          box-shadow: 0 0 0 3px rgba(31, 85, 212, 0.1);
         }
 
         .admin-bulk-actions-right {
@@ -216,7 +247,7 @@ export default function BulkActionsPanel({
           padding: 0.375rem;
           border-radius: 0.375rem;
           background-color: transparent;
-          color: var(--color-text-secondary, #64748b);
+          color: #6b7280;
           cursor: pointer;
           transition: background-color 0.2s, color 0.2s;
           display: flex;
@@ -225,12 +256,12 @@ export default function BulkActionsPanel({
         }
 
         .admin-bulk-actions-clear:hover {
-          background-color: var(--color-bg-hover, rgba(0, 0, 0, 0.05));
-          color: var(--color-text, #1e293b);
+          background-color: #f3f4f6;
+          color: #111827;
         }
 
         .admin-bulk-actions-clear:focus-visible {
-          outline: 2px solid var(--color-focus, #3b82f6);
+          outline: 2px solid #1f55d4;
           outline-offset: 2px;
         }
 
@@ -252,32 +283,6 @@ export default function BulkActionsPanel({
           .admin-bulk-actions-right {
             width: 100%;
             justify-content: flex-end;
-          }
-        }
-
-        @media (prefers-color-scheme: dark) {
-          .admin-bulk-actions-panel {
-            background-color: var(--color-surface-dark, #1a202c);
-            border-top-color: var(--color-border-dark, #334155);
-          }
-
-          .admin-bulk-actions-select {
-            background-color: var(--color-surface-dark, #1e293b);
-            color: var(--color-text-dark, #f1f5f9);
-            border-color: var(--color-border-dark, #334155);
-          }
-
-          .admin-bulk-actions-count {
-            color: var(--color-text-dark, #f1f5f9);
-          }
-
-          .admin-bulk-actions-clear {
-            color: var(--color-text-secondary-dark, #94a3b8);
-          }
-
-          .admin-bulk-actions-clear:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--color-text-dark, #f1f5f9);
           }
         }
       `}</style>

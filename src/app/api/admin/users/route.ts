@@ -1,19 +1,28 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { withTenantContext } from '@/lib/api-wrapper'
 import { requireTenantContext } from '@/lib/tenant-utils'
 import prisma from '@/lib/prisma'
 import { respond } from '@/lib/api-response'
 import { hasPermission, PERMISSIONS } from '@/lib/permissions'
 import { createHash } from 'crypto'
+import bcrypt from 'bcryptjs'
 import { applyRateLimit, getClientIp } from '@/lib/rate-limit'
 import { tenantFilter } from '@/lib/tenant'
+import { AuditLogService } from '@/services/audit-log.service'
+import { UserCreateSchema } from '@/schemas/users'
+import { UserRole } from '@prisma/client'
 
 export const runtime = 'nodejs'
 export const revalidate = 30 // ISR: Revalidate every 30 seconds
 
 export const GET = withTenantContext(async (request: Request) => {
   const ctx = requireTenantContext()
-  const tenantId = ctx.tenantId ?? null
+  const tenantId = ctx.tenantId
+
+  if (!tenantId) {
+    return respond.badRequest('Tenant context is required')
+  }
+
   try {
     const ip = getClientIp(request as unknown as Request)
     const rl = await applyRateLimit(`admin-users-list:${ip}`, 240, 60_000)
@@ -22,9 +31,9 @@ export const GET = withTenantContext(async (request: Request) => {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
     }
 
-    const role = ctx.role ?? ''
+    const userRole = ctx.role ?? ''
     if (!ctx.userId) return respond.unauthorized()
-    if (!hasPermission(role, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
+    if (!hasPermission(userRole, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
 
     try {
       // Parse pagination and filter parameters
@@ -35,7 +44,7 @@ export const GET = withTenantContext(async (request: Request) => {
 
       // Parse filter parameters
       const search = searchParams.get('search')?.trim() || undefined
-      const role = searchParams.get('role')?.trim() || undefined
+      const roleFilter = searchParams.get('role')?.trim() || undefined
       const status = searchParams.get('status')?.trim() || undefined
       const tier = searchParams.get('tier')?.trim() || undefined
       const department = searchParams.get('department')?.trim() || undefined
@@ -43,7 +52,7 @@ export const GET = withTenantContext(async (request: Request) => {
       const sortOrder = searchParams.get('sortOrder') || 'desc'
 
       // Build Prisma WHERE clause with filters
-      const whereClause: any = tenantFilter(tenantId)
+      const whereClause = tenantFilter(tenantId)
 
       // Add search filter (searches email and name)
       if (search) {
@@ -54,8 +63,8 @@ export const GET = withTenantContext(async (request: Request) => {
       }
 
       // Add role filter
-      if (role && role !== 'ALL') {
-        whereClause.role = role
+      if (roleFilter && roleFilter !== 'ALL') {
+        whereClause.role = roleFilter
       }
 
       // Add availability status filter
@@ -148,7 +157,7 @@ export const GET = withTenantContext(async (request: Request) => {
       if (queryError) throw queryError
 
       // If query succeeded, use the data
-      const { total, users } = queryData as { total: number; users: Array<{ id: string; name: string | null; email: string; role: string; createdAt: Date; updatedAt: Date | null }> }
+      const { total, users } = queryData as { total: number; users: Array<{ id: string; name: string | null; email: string; role: string; availabilityStatus: string; department: string | null; position: string | null; tier: string | null; experienceYears: number | null; image: string | null; createdAt: Date; updatedAt: Date | null }> }
 
       // Map users to response format
       const mapped = users.map((user) => ({
@@ -156,6 +165,12 @@ export const GET = withTenantContext(async (request: Request) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        availabilityStatus: user.availabilityStatus, // Added missing field
+        department: user.department, // Added missing field
+        position: user.position, // Added missing field
+        tier: user.tier, // Added missing field
+        experienceYears: user.experienceYears, // Added missing field
+        image: user.image, // Added missing field
         createdAt: user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt,
         updatedAt: user.updatedAt ? (user.updatedAt instanceof Date ? user.updatedAt.toISOString() : user.updatedAt) : (user.createdAt instanceof Date ? user.createdAt.toISOString() : user.createdAt)
       }))
@@ -182,7 +197,7 @@ export const GET = withTenantContext(async (request: Request) => {
           },
           filters: {
             search: search || undefined,
-            role: role || undefined,
+            role: roleFilter || undefined,
             status: status || undefined,
             tier: tier || undefined,
             department: department || undefined,
@@ -199,7 +214,7 @@ export const GET = withTenantContext(async (request: Request) => {
             'X-Current-Page': page.toString(),
             'X-Page-Size': limit.toString(),
             'X-Filter-Search': search || 'none',
-            'X-Filter-Role': role || 'none',
+            'X-Filter-Role': roleFilter || 'none',
             'X-Filter-Tier': tier || 'none'
           }
         }
@@ -235,5 +250,139 @@ export const GET = withTenantContext(async (request: Request) => {
       users: fallback,
       pagination: { page: 1, limit: 50, total: 3, pages: 1 }
     }, { status: 200 })
+  }
+})
+
+/**
+ * POST /api/admin/users
+ * Create a new user in the organization
+ * Requires: USERS_MANAGE permission
+ */
+export const POST = withTenantContext(async (request: NextRequest) => {
+  const ctx = requireTenantContext()
+  const tenantId = ctx.tenantId
+
+  if (!tenantId) {
+    return respond.badRequest('Tenant context is required')
+  }
+
+  try {
+    const postUserRole = ctx.role ?? ''
+    if (!ctx.userId) return respond.unauthorized()
+    if (!hasPermission(postUserRole, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
+
+    const hasDb = Boolean(process.env.NETLIFY_DATABASE_URL)
+    if (!hasDb) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 501 })
+    }
+
+    const ip = getClientIp(request as unknown as Request)
+    const rl = await applyRateLimit(`admin-create-user:${ip}`, 50, 60_000)
+    if (rl && rl.allowed === false) {
+      try {
+        const { logAudit } = await import('@/lib/audit')
+        await logAudit({
+          action: 'security.ratelimit.block',
+          details: { tenantId, ip, key: `admin-create-user:${ip}`, route: '/api/admin/users' }
+        })
+      } catch {}
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
+    }
+
+    const json = await request.json().catch(() => ({}))
+    const { name, email, role, temporaryPassword: password } = UserCreateSchema.parse(json)
+
+    const existingUser = await prisma.user.findFirst({
+      where: { ...tenantFilter(tenantId), email: email }
+    })
+
+    if (existingUser) {
+      return respond.conflict('User with this email already exists')
+    }
+
+    // Hash password before storing in database
+    const hashedPassword = password ? await bcrypt.hash(password, 12) : undefined
+
+    const newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        role,
+        password: hashedPassword,
+        tenantId
+      }
+    })
+
+    
+    await AuditLogService.createAuditLog({ tenantId, action: 'user.create', userId: newUser.id, metadata: { name, email, role } })
+
+    return NextResponse.json(newUser, { status: 201 })
+  } catch (error: any) {
+    console.error('Error creating user:', error)
+    return respond.serverError('An internal server error occurred.')
+  }
+})
+
+/**
+ * PUT /api/admin/users/:id
+ * Update a user in the organization
+ * Requires: USERS_MANAGE permission
+ */
+export const PUT = withTenantContext(async (request: NextRequest) => {
+  const ctx = requireTenantContext()
+  const tenantId = ctx.tenantId
+
+  if (!tenantId) {
+    return respond.badRequest('Tenant context is required')
+  }
+
+  try {
+    const putUserRole = ctx.role ?? ''
+    if (!ctx.userId) return respond.unauthorized()
+    if (!hasPermission(putUserRole, PERMISSIONS.USERS_MANAGE)) return respond.forbidden('Forbidden')
+
+    const hasDb = Boolean(process.env.NETLIFY_DATABASE_URL)
+    if (!hasDb) {
+      return NextResponse.json({ error: 'Database not configured' }, { status: 501 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const userId = searchParams.get('id')
+
+    if (!userId) {
+      return respond.badRequest('User ID is required')
+    }
+
+    const json = await request.json().catch(() => ({}))
+    const { name, email, role, temporaryPassword: password } = UserCreateSchema.parse(json)
+
+    const existingUser = await prisma.user.findFirst({
+      where: { ...tenantFilter(tenantId), id: userId }
+    })
+
+    if (!existingUser) {
+      return respond.notFound('User not found')
+    }
+
+    // Hash password before storing in database
+    const hashedPassword = password ? await bcrypt.hash(password, 12) : undefined
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        email,
+        role,
+        ...(hashedPassword ? { password: hashedPassword } : {})
+      }
+    })
+
+    
+    await AuditLogService.createAuditLog({ tenantId, action: 'user.update', userId: updatedUser.id, metadata: { name, email, role } })
+
+    return NextResponse.json(updatedUser, { status: 200 })
+  } catch (error: any) {
+    console.error('Error updating user:', error)
+    return respond.serverError('An internal server error occurred.')
   }
 })

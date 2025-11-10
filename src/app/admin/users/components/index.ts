@@ -14,10 +14,13 @@ export { OperationsOverviewCards } from './OperationsOverviewCards'
 
 // Phase 4: Tab Components
 export {
-  ExecutiveDashboardTab,
   WorkflowsTab,
   BulkOperationsTab,
   AuditTab,
   AdminTab,
   RbacTab
 } from './tabs'
+
+// Phase 7: Advanced Query Builder Components
+export { AdvancedQueryBuilder } from './AdvancedQueryBuilder'
+export { QueryTemplateManager } from './QueryTemplateManager'

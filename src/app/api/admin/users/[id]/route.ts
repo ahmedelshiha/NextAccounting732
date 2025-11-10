@@ -12,6 +12,39 @@ import { respond } from '@/lib/api-response'
 
 export const runtime = 'nodejs'
 
+export const GET = withTenantContext(async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
+  try {
+    const ctx = requireTenantContext()
+    const role = ctx.role ?? ''
+    if (!ctx.userId) return respond.unauthorized()
+    if (!hasPermission(role, PERMISSIONS.USERS_VIEW)) return respond.forbidden('Forbidden')
+
+    const { id } = await context.params
+    const tenantId = ctx.tenantId
+
+    const user = await prisma.user.findFirst({
+      where: { id, ...(tenantFilter(tenantId) as any) },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    })
+
+    if (!user) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, data: user })
+  } catch (error) {
+    console.error('Error fetching user:', error)
+    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 })
+  }
+})
+
 export const PATCH = withTenantContext(async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
   try {
     const ctx = requireTenantContext()

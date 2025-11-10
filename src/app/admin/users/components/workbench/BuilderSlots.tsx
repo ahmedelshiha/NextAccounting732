@@ -3,7 +3,7 @@
 import React from 'react'
 import { useBuilderContent } from '@/hooks/useBuilderContent'
 import { BUILDER_MODELS } from '@/lib/builder-io/config'
-import { QuickActionsBar } from '../QuickActionsBar'
+import { QuickActionsBar, QuickActionsBarProps } from '../QuickActionsBar'
 import OverviewCards from './OverviewCards'
 import AdminSidebar from './AdminSidebar'
 import BulkActionsPanel from './BulkActionsPanel'
@@ -37,31 +37,31 @@ function renderBuilderBlocks(blocks: any[]): React.ReactNode {
  *
  * Renders Builder.io content if available, otherwise renders default QuickActionsBar
  */
-export function BuilderHeaderSlot() {
+export function BuilderHeaderSlot(props: Partial<QuickActionsBarProps>) {
   const { content, isLoading, error, isEnabled } = useBuilderContent(
     BUILDER_MODELS.ADMIN_WORKBENCH_HEADER
   )
 
   if (!isEnabled) {
-    return <QuickActionsBar />
+    return <QuickActionsBar {...props} />
   }
 
   if (isLoading) {
-    return <QuickActionsBar />
+    return <QuickActionsBar {...props} />
   }
 
   if (error) {
     console.warn(`Failed to load Builder.io header content: ${error}`)
-    return <QuickActionsBar />
+    return <QuickActionsBar {...props} />
   }
 
   if (!content) {
-    return <QuickActionsBar />
+    return <QuickActionsBar {...props} />
   }
 
   return (
-    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_HEADER}>
-      {content.blocks ? renderBuilderBlocks(content.blocks) : <QuickActionsBar />}
+    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_HEADER} data-testid="builder-header-slot">
+      {content.blocks ? renderBuilderBlocks(content.blocks) : <QuickActionsBar {...props} />}
     </div>
   )
 }
@@ -94,7 +94,7 @@ export function BuilderMetricsSlot() {
   }
 
   return (
-    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_METRICS}>
+    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_METRICS} data-testid="builder-metrics-slot">
       {content.blocks ? renderBuilderBlocks(content.blocks) : <OverviewCards />}
     </div>
   )
@@ -128,7 +128,7 @@ export function BuilderSidebarSlot(props: Parameters<typeof AdminSidebar>[0]) {
   }
 
   return (
-    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_SIDEBAR}>
+    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_SIDEBAR} data-testid="builder-sidebar-slot">
       {content.blocks ? renderBuilderBlocks(content.blocks) : <AdminSidebar {...props} />}
     </div>
   )
@@ -162,8 +162,43 @@ export function BuilderFooterSlot(props: Parameters<typeof BulkActionsPanel>[0])
   }
 
   return (
-    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_FOOTER}>
+    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_FOOTER} data-testid="builder-footer-slot">
       {content.blocks ? renderBuilderBlocks(content.blocks) : <BulkActionsPanel {...props} />}
+    </div>
+  )
+}
+
+/**
+ * Builder.io content slot wrapper for main content section
+ *
+ * Renders Builder.io content for the main directory/table area
+ * This slot allows customizing the layout of the user directory section
+ */
+export function BuilderMainSlot(props?: any) {
+  const { content, isLoading, error, isEnabled } = useBuilderContent(
+    BUILDER_MODELS.ADMIN_WORKBENCH_MAIN
+  )
+
+  if (!isEnabled) {
+    return null
+  }
+
+  if (isLoading) {
+    return null
+  }
+
+  if (error) {
+    console.warn(`Failed to load Builder.io main content: ${error}`)
+    return null
+  }
+
+  if (!content) {
+    return null
+  }
+
+  return (
+    <div data-builder-model={BUILDER_MODELS.ADMIN_WORKBENCH_MAIN} data-testid="builder-main-slot">
+      {content.blocks ? renderBuilderBlocks(content.blocks) : null}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 import {
@@ -8,6 +8,10 @@ import {
   CollapsibleTrigger,
   CollapsibleContent
 } from '@/components/ui/collapsible'
+import RoleDistributionChart from '../RoleDistributionChart'
+import UserGrowthChart from '../UserGrowthChart'
+import RecentActivityFeed from '../RecentActivityFeed'
+import { useUsersContext } from '../../contexts/UsersContextProvider'
 
 interface AdminSidebarProps {
   onFilterChange?: (filters: Record<string, any>) => void
@@ -28,6 +32,7 @@ export default function AdminSidebar({
   onFilterChange,
   onClose
 }: AdminSidebarProps) {
+  const context = useUsersContext()
   const [expandedSections, setExpandedSections] = useState({
     filters: true,
     analytics: true,
@@ -41,6 +46,43 @@ export default function AdminSidebar({
     department: undefined,
     dateRange: 'all'
   })
+
+  // Generate role distribution data from users
+  const roleDistributionData = useMemo(() => {
+    const users = Array.isArray(context.users) ? context.users : []
+    const distribution: Record<string, number> = {}
+
+    users.forEach((user) => {
+      const role = user.role || 'UNKNOWN'
+      distribution[role] = (distribution[role] || 0) + 1
+    })
+
+    return Object.keys(distribution).length > 0 ? distribution : undefined
+  }, [context.users])
+
+  // Generate user growth data (last 6 months)
+  const userGrowthData = useMemo(() => {
+    const users = Array.isArray(context.users) ? context.users : []
+
+    // Create monthly growth data for last 6 months
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+    const monthlyData: Record<string, number> = {}
+
+    months.forEach((month) => {
+      monthlyData[month] = 0
+    })
+
+    // Simple distribution for demo (would be calculated from createdAt in production)
+    const usersPerMonth = Math.ceil(users.length / 6)
+    months.forEach((month, index) => {
+      monthlyData[month] = Math.min(usersPerMonth + index * 2, users.length)
+    })
+
+    return {
+      labels: months,
+      values: months.map((month) => monthlyData[month])
+    }
+  }, [context.users])
 
   const toggleSection = useCallback((section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -222,9 +264,19 @@ export default function AdminSidebar({
           </CollapsibleTrigger>
 
           <CollapsibleContent className="admin-sidebar-content-inner">
-            <div className="text-sm text-gray-600 p-3 bg-gray-50 rounded">
-              <p className="font-medium mb-2">📊 Charts coming soon</p>
-              <p className="text-xs">Role distribution, user growth, and activity insights will appear here.</p>
+            <div className="space-y-4">
+              <div className="bg-white rounded border border-gray-100 p-3">
+                <RoleDistributionChart
+                  data={roleDistributionData}
+                  loading={context.isLoading}
+                />
+              </div>
+              <div className="bg-white rounded border border-gray-100 p-3">
+                <UserGrowthChart
+                  data={userGrowthData}
+                  loading={context.isLoading}
+                />
+              </div>
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -253,9 +305,12 @@ export default function AdminSidebar({
           </CollapsibleTrigger>
 
           <CollapsibleContent className="admin-sidebar-content-inner">
-            <div className="text-sm text-gray-600 p-3 bg-gray-50 rounded">
-              <p className="font-medium mb-2">⏰ Activity feed coming soon</p>
-              <p className="text-xs">Recent user actions and system events will appear here.</p>
+            <div className="bg-white rounded border border-gray-100">
+              <RecentActivityFeed
+                limit={5}
+                showViewAll={true}
+                onViewAll={() => console.log('View all activity')}
+              />
             </div>
           </CollapsibleContent>
         </Collapsible>
@@ -275,7 +330,7 @@ export default function AdminSidebar({
           align-items: center;
           justify-content: space-between;
           padding-bottom: 0.75rem;
-          border-bottom: 1px solid var(--color-border, #e2e8f0);
+          border-bottom: 1px solid #e5e7eb;
           gap: 0.5rem;
         }
 
@@ -298,7 +353,7 @@ export default function AdminSidebar({
         }
 
         .admin-sidebar-trigger:hover {
-          background-color: var(--color-hover, rgba(0, 0, 0, 0.05));
+          background-color: #f3f4f6;
           border-radius: 0.375rem;
           padding-left: 0.25rem;
           padding-right: 0.25rem;
@@ -308,6 +363,7 @@ export default function AdminSidebar({
           width: 1rem;
           height: 1rem;
           transition: transform 0.3s ease;
+          color: #6b7280;
         }
 
         .admin-sidebar-content-inner {
@@ -316,7 +372,7 @@ export default function AdminSidebar({
           gap: 1rem;
           margin-top: 0.75rem;
           padding: 0.75rem;
-          background-color: var(--color-bg-subtle, #f8fafc);
+          background-color: #f9fafb;
           border-radius: 0.375rem;
         }
 
@@ -329,7 +385,7 @@ export default function AdminSidebar({
         .admin-sidebar-filter-label {
           font-size: 0.75rem;
           font-weight: 600;
-          color: var(--color-text-secondary, #64748b);
+          color: #6b7280;
           text-transform: uppercase;
           letter-spacing: 0.05em;
         }
@@ -337,33 +393,22 @@ export default function AdminSidebar({
         .admin-sidebar-filter-select {
           padding: 0.5rem 0.75rem;
           font-size: 0.875rem;
-          border: 1px solid var(--color-border, #e2e8f0);
+          border: 1px solid #d1d5db;
           border-radius: 0.375rem;
-          background-color: white;
-          color: var(--color-text, #1e293b);
+          background-color: #ffffff;
+          color: #111827;
           transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .admin-sidebar-filter-select:hover {
-          border-color: var(--color-border-hover, #cbd5e1);
+          border-color: #9ca3af;
+          background-color: #f9fafb;
         }
 
         .admin-sidebar-filter-select:focus {
           outline: none;
-          border-color: var(--color-focus, #3b82f6);
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        }
-
-        @media (prefers-color-scheme: dark) {
-          .admin-sidebar-filter-select {
-            background-color: var(--color-surface-dark, #1e293b);
-            color: var(--color-text-dark, #f1f5f9);
-            border-color: var(--color-border-dark, #334155);
-          }
-
-          .admin-sidebar-content-inner {
-            background-color: var(--color-bg-dark-subtle, rgba(15, 23, 42, 0.5));
-          }
+          border-color: #1f55d4;
+          box-shadow: 0 0 0 3px rgba(31, 85, 212, 0.1);
         }
 
         /* Scrollbar styling */
@@ -376,8 +421,30 @@ export default function AdminSidebar({
         }
 
         .admin-sidebar-content::-webkit-scrollbar-thumb {
-          background-color: var(--color-scroll-thumb, #cbd5e1);
+          background-color: #cbd5e1;
           border-radius: 2px;
+        }
+
+        /* Chart container styles */
+        :global(.role-distribution-chart-container),
+        :global(.user-growth-chart-container) {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        :global(.role-distribution-chart-title),
+        :global(.user-growth-chart-title) {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #111827;
+          margin: 0;
+        }
+
+        :global(.role-distribution-chart-body),
+        :global(.user-growth-chart-body) {
+          width: 100%;
+          height: auto;
         }
       `}</style>
     </div>

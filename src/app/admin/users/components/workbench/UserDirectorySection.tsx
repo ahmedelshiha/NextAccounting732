@@ -8,6 +8,7 @@ interface UserDirectorySectionProps {
   selectedUserIds?: Set<string>
   onSelectionChange?: (ids: Set<string>) => void
   filters?: Record<string, any>
+  onViewProfileInline?: (user: any) => void
 }
 
 /**
@@ -23,15 +24,19 @@ interface UserDirectorySectionProps {
 export default function UserDirectorySection({
   selectedUserIds = new Set(),
   onSelectionChange,
-  filters = {}
+  filters = {},
+  onViewProfileInline
 }: UserDirectorySectionProps) {
   return (
     <Suspense fallback={<UserDirectorySkeleton />}>
-      <UsersTableWrapper
-        selectedUserIds={selectedUserIds}
-        onSelectionChange={onSelectionChange}
-        filters={filters}
-      />
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <UsersTableWrapper
+          selectedUserIds={selectedUserIds}
+          onSelectionChange={onSelectionChange}
+          filters={filters}
+          onViewProfileInline={onViewProfileInline}
+        />
+      </div>
     </Suspense>
   )
 }
