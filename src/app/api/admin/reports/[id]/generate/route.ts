@@ -58,8 +58,7 @@ export const POST = withTenantContext(async (request: NextRequest, { params }: {
           availabilityStatus: true,
           department: true,
           position: true,
-          createdAt: true,
-          lastLoginAt: true
+          createdAt: true
         }
       })
 
@@ -68,11 +67,13 @@ export const POST = withTenantContext(async (request: NextRequest, { params }: {
         data = applyFilters(data, filters)
       }
 
+      // Cast sections as array to avoid JsonValue type issues
+      const sections = Array.isArray(typedReport.sections) ? (typedReport.sections as any[]) : []
       const reportData = {
-        columns: typedReport.sections[0]?.columns || [],
+        columns: sections[0]?.columns || [],
         rows: data,
         rowCount: data.length,
-        summary: calculateSummaryStats(data, typedReport.sections[0]?.calculations || [])
+        summary: calculateSummaryStats(data, sections[0]?.calculations || [])
       }
 
       let generatedContent = ''
