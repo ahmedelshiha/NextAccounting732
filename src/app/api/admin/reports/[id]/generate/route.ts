@@ -35,12 +35,12 @@ export const POST = withTenantContext(async (request: NextRequest, { params }: {
 
     // Cast sections to properly handle Prisma JSON types
     const sections = Array.isArray(report.sections) ? (report.sections as unknown as ReportSection[]) : []
-    const typedReport = {
+    const typedReport: Report = {
       id: report.id,
       tenantId: report.tenantId,
       userId: report.userId,
       name: report.name,
-      description: report.description,
+      description: report.description ?? undefined,
       sections: sections,
       createdAt: report.createdAt.toISOString(),
       updatedAt: report.updatedAt.toISOString()
