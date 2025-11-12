@@ -95,7 +95,8 @@ const _api_POST = async (request: NextRequest) => {
       {
         ...input,
         fiscalYearStart: input.fiscalYearStart ? new Date(input.fiscalYearStart) : undefined,
-      }
+        registrations: (input.registrations as any) || undefined,
+      } as any
     );
 
     logger.info("Entity created successfully", {
