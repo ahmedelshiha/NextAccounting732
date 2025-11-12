@@ -119,9 +119,9 @@ export class EntityService {
               data: {
                 entityId: newEntity.id,
                 type: obligation.type,
-                country: input.country,
+                country: countryCode,
                 frequency: obligation.frequency,
-                ruleConfig: obligation.ruleConfig || {},
+                ruleConfig: obligation.rules || {},
                 active: true,
               },
             })
