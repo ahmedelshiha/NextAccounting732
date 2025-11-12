@@ -108,7 +108,7 @@ export default function AcceptInvitationPage() {
         {status === "register" && (
           <>
             <CardHeader>
-              <CardTitle>You're Invited!</CardTitle>
+              <CardTitle>You&apos;re Invited!</CardTitle>
               <CardDescription>
                 Complete your registration to accept this invitation
               </CardDescription>
@@ -173,7 +173,7 @@ export default function AcceptInvitationPage() {
             <CardContent className="space-y-4">
               <Alert>
                 <AlertDescription>
-                  Welcome! Your account is now set up. You'll be redirected to the dashboard shortly.
+                  Welcome! Your account is now set up. You&apos;ll be redirected to the dashboard shortly.
                 </AlertDescription>
               </Alert>
 
