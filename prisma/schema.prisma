@@ -322,7 +322,10 @@ model Tenant {
   filterPresets         FilterPreset[]
   reports               Report[]
   userManagementSettings UserManagementSettings?
-  exportSchedules    ExportSchedule[]
+  exportSchedules       ExportSchedule[]
+  entities              Entity[]
+  consents              Consent[]
+  verificationAttempts  VerificationAttempt[]
 
   @@index([status])
 }
