@@ -488,12 +488,32 @@ Epic: BNK-6 Banking & receipts OCR
 - Full Prisma schema integration
 
 ## Phase 7 — Country Tax Workflows
+**Status: ✅ COMPLETE**
+
 Epics: UAE-7, KSA-7, EGY-7
-- End-to-end VAT/Corporate/Zakat/WHT/ESR/ETA workflows; validations and working papers.
+
+**Fully Implemented** ✅:
+- ✅ UAE VAT/Corporate/ESR workflows (src/lib/tax-workflows/uae-workflows.ts)
+- ✅ KSA VAT/Zakat/WHT workflows (src/lib/tax-workflows/ksa-workflows.ts)
+- ✅ Egypt VAT/ETA/e-Invoice workflows (src/lib/tax-workflows/egypt-workflows.ts)
+- ✅ End-to-end filing procedures with validation
+- ✅ Working papers generation and tracking
+- ✅ Compliance calendar integration
+- ✅ Multi-country obligation management
 
 ## Phase 8 — E‑Invoicing Integrations
+**Status: ✅ COMPLETE**
+
 Epics: ZATCA-8, ETA-8
-- KSA Phase-2 adapters; Egypt clearance/signing; key rotation and tamper-proof storage.
+
+**Fully Implemented** ✅:
+- ✅ ZATCA Phase-2 adapter (src/lib/einvoicing/zatca-adapter.ts)
+- ✅ Egypt ETA adapter (src/lib/einvoicing/eta-adapter.ts)
+- ✅ Key storage and rotation (src/lib/security/key-management.ts)
+- ✅ Document signing and verification
+- ✅ Conformance testing suite
+- ✅ Tamper-proof audit trails
+- ✅ Government API integration
 
 ## Phase 9 — AI Agents
 **Status: ✅ COMPLETE**
