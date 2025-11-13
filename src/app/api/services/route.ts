@@ -255,7 +255,7 @@ export const POST = withTenantContext(
       // Log audit event
       await logger.audit({
         action: 'service.request_created',
-        actorId: userId,
+        actorId: userId!,
         targetId: serviceId,
         details: { requestId, serviceName: service.name },
       });
